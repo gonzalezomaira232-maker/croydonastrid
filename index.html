@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento Comercial Regional</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-chart-line"></i> Seguimiento</h2>
+            <span class="sidebar-subtitle">Comercial Regional</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active" data-module="metas">
+                <i class="fas fa-bullseye"></i>
+                <span>Metas por Campana</span>
+            </li>
+            <li data-module="seguimiento">
+                <i class="fas fa-file-excel"></i>
+                <span>Carga de Excel</span>
+            </li>
+            <li data-module="zonas">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Seguimiento por Zona</span>
+            </li>
+            <li data-module="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard Regional</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="connection-status" id="connectionStatus">
+                <i class="fas fa-circle"></i>
+                <span>Sin conexión a Sheets</span>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnConfigSheet">
+                <i class="fas fa-cog"></i> Configurar Sheets
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile header -->
+    <header class="mobile-header">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>Seguimiento Comercial</h1>
+    </header>
+
+    <!-- Main content -->
+    <main id="mainContent" class="main-content">
+        <!-- Metas Mensuales -->
+        <section id="module-metas" class="module active">
+            <div class="module-header">
+                <h1><i class="fas fa-bullseye"></i> Metas por Campana</h1>
+                <p>Define las metas por zona para cada campana</p>
+            </div>
+            <div class="controls-bar">
+                <div class="control-group">
+                    <label for="metaCampana">Campana</label>
+                    <select id="metaCampana"></select>
+                </div>
+                <div class="control-group">
+                    <label for="metaAnio">Anio</label>
+                    <select id="metaAnio"></select>
+                </div>
+                <button class="btn btn-primary" id="btnCargarMetas">
+                    <i class="fas fa-search"></i> Cargar Metas
+                </button>
+                <button class="btn btn-success" id="btnGuardarMetas">
+                    <i class="fas fa-save"></i> Guardar Metas
+                </button>
+                <div class="separator-vertical"></div>
+                <button class="btn btn-accent" id="btnSubirMetasExcel">
+                    <i class="fas fa-file-upload"></i> Cargar desde Excel
+                </button>
+                <input type="file" id="fileInputMetas" accept=".xls,.xlsx" hidden>
+            </div>
+            <div class="table-container">
+                <table id="tablaMetas" class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="sticky-col">Zona</th>
+                            <th>Consec.</th>
+                            <th>% Consec.</th>
+                            <th>Nuevas</th>
+                            <th>Estencil Pas</th>
+                            <th>Crecimiento</th>
+                            <th>PPDD</th>
+                            <th>Recuperada</th>
+                            <th>Reingresos</th>
+                            <th>Vr. Venta</th>
+                            <th>VOP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyMetas"></tbody>
+                </table>
+            </div>
+            <div id="metasMsg" class="message-area"></div>
+        </section>
+
+        <!-- Carga de Excel -->
+        <section id="module-seguimiento" class="module">
+            <div class="module-header">
+                <h1><i class="fas fa-file-excel"></i> Carga de Excel Diario</h1>
+                <p>Sube el archivo de seguimiento diario (.xls / .xlsx)</p>
+            </div>
+            <div class="controls-bar">
+                <div class="control-group">
+                    <label for="segCampana">Campana</label>
+                    <select id="segCampana"></select>
+                </div>
+                <div class="control-group">
+                    <label for="segAnio">Anio</label>
+                    <select id="segAnio"></select>
+                </div>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Arrastra tu archivo aqui o haz clic para seleccionar</p>
+                <input type="file" id="fileInput" accept=".xls,.xlsx" hidden>
+                <button class="btn btn-primary" id="btnSelectFile">
+                    <i class="fas fa-folder-open"></i> Seleccionar Archivo
+                </button>
+            </div>
+            <div id="fileInfo" class="file-info" style="display:none;">
+                <i class="fas fa-file-excel"></i>
+                <span id="fileName"></span>
+                <button class="btn btn-sm btn-danger" id="btnRemoveFile">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="previewContainer" style="display:none;">
+                <h3>Vista previa de datos</h3>
+                <div class="preview-stats" id="previewStats"></div>
+                <div class="table-container">
+                    <table id="tablaPreview" class="data-table">
+                        <thead id="headPreview"></thead>
+                        <tbody id="bodyPreview"></tbody>
+                    </table>
+                </div>
+                <div class="controls-bar">
+                    <button class="btn btn-success" id="btnConfirmarCarga">
+                        <i class="fas fa-check"></i> Confirmar Carga
+                    </button>
+                    <button class="btn btn-outline" id="btnCancelarCarga">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+            <div id="seguimientoMsg" class="message-area"></div>
+        </section>
+
+        <!-- Seguimiento por Zona -->
+        <section id="module-zonas" class="module">
+            <div class="module-header">
+                <h1><i class="fas fa-map-marker-alt"></i> Seguimiento por Zona</h1>
+                <p>Selecciona una zona para ver su detalle</p>
+            </div>
+            <div id="zonasGrid" class="zonas-grid"></div>
+            <div id="zonaDetalle" class="zona-detalle" style="display:none;">
+                <button class="btn btn-outline btn-back" id="btnVolverZonas">
+                    <i class="fas fa-arrow-left"></i> Volver a zonas
+                </button>
+                <h2 id="zonaDetalleTitle"></h2>
+                <div class="zona-sections">
+                    <div class="zona-section">
+                        <h3><i class="fas fa-bullseye"></i> Meta por Campana</h3>
+                        <div class="controls-bar">
+                            <div class="control-group">
+                                <label for="zonaMetaCampana">Campana</label>
+                                <select id="zonaMetaCampana"></select>
+                            </div>
+                            <div class="control-group">
+                                <label for="zonaMetaAnio">Anio</label>
+                                <select id="zonaMetaAnio"></select>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table" id="tablaMetaVsActividad">
+                                <thead>
+                                    <tr>
+                                        <th>KPI</th>
+                                        <th>Meta</th>
+                                        <th>Actividad</th>
+                                        <th>Falta</th>
+                                        <th>Cumplimiento</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyMetaVsActividad"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="zona-section">
+                        <h3><i class="fas fa-tachometer-alt"></i> Avance vs Meta</h3>
+                        <div class="gauges-grid" id="gaugesContainer"></div>
+                    </div>
+                    <div class="zona-section">
+                        <h3><i class="fas fa-table"></i> Seguimiento Diario</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead id="zonaSeguimientoHead"></thead>
+                                <tbody id="zonaSeguimientoBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Regional -->
+        <section id="module-dashboard" class="module">
+            <div class="module-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard Regional</h1>
+                <p>Resumen consolidado de todas las zonas</p>
+            </div>
+            <div class="controls-bar">
+                <div class="control-group">
+                    <label for="dashCampana">Campana</label>
+                    <select id="dashCampana"></select>
+                </div>
+                <div class="control-group">
+                    <label for="dashAnio">Anio</label>
+                    <select id="dashAnio"></select>
+                </div>
+                <button class="btn btn-primary" id="btnRefreshDash">
+                    <i class="fas fa-sync"></i> Actualizar
+                </button>
+            </div>
+            <div id="dashTotales" class="kpi-cards"></div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Cumplimiento PPDD por Zona (%)</h3>
+                    <div class="chart-container">
+                        <canvas id="chartCumplimientoZona"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Tendencia Diaria</h3>
+                    <div class="chart-container">
+                        <canvas id="chartTendencia"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="zona-section">
+                <h3><i class="fas fa-traffic-light"></i> Semaforo de Cumplimiento</h3>
+                <div class="table-container">
+                    <table class="data-table" id="tablaSemaforo">
+                        <thead id="headSemaforo"></thead>
+                        <tbody id="bodySemaforo"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Config Modal -->
+    <div class="modal-overlay" id="modalConfig" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Configurar Google Sheets</h2>
+                <button class="btn-close" id="btnCloseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Pega la URL de tu Google Apps Script desplegado:</p>
+                <input type="text" id="inputSheetUrl" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                <div class="modal-instructions">
+                    <h4>Instrucciones:</h4>
+                    <ol>
+                        <li>Crea un Google Sheet con dos hojas: "Metas" y "Seguimiento"</li>
+                        <li>Ve a Extensiones &gt; Apps Script</li>
+                        <li>Pega el codigo del Apps Script (ver archivo apps-script.js)</li>
+                        <li>Despliega como aplicacion web (acceso: cualquiera)</li>
+                        <li>Copia la URL y pegala aqui</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnSaveConfig">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/metas.js"></script>
+    <script src="js/seguimiento.js"></script>
+    <script src="js/zonas.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
