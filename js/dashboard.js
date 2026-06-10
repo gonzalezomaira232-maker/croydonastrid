@@ -171,20 +171,22 @@ function renderChartFQZona(seguimiento) {
 
     const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    const zonasFQ = APP.zonas.map(zona => {
+    const fqData = APP.zonas.map(zona => {
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
-        return Math.round(promediarActividadZona(seg, 'FQ') * 100) / 100;
+        return { zona, fq: Math.round(promediarActividadZona(seg, 'FQ') * 100) / 100 };
     });
 
-    const colors = zonasFQ.map(v => v > 0 ? '#3949ab' : '#bdbdbd');
+    fqData.sort((a, b) => b.fq - a.fq);
+
+    const colors = fqData.map(d => d.fq > 0 ? '#3949ab' : '#bdbdbd');
 
     chartFQZona = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: APP.zonas.map(z => z.length > 12 ? z.substring(0, 10) + '..' : z),
+            labels: fqData.map(d => d.zona.length > 12 ? d.zona.substring(0, 10) + '..' : d.zona),
             datasets: [{
                 label: 'FQ',
-                data: zonasFQ,
+                data: fqData.map(d => d.fq),
                 backgroundColor: colors,
                 borderWidth: 0,
                 borderRadius: 4
