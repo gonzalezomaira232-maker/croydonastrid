@@ -1,6 +1,6 @@
 // ===== Modulo: Dashboard Regional =====
 let chartCumplimiento = null;
-let chartTendencia = null;
+let chartFQZona = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnRefreshDash').addEventListener('click', refreshDashboard);
@@ -21,7 +21,7 @@ function refreshDashboard() {
 
     renderDashTotales(seguimiento, metas);
     renderChartCumplimiento(metas, seguimiento);
-    renderChartTendencia(seguimiento);
+    renderChartFQZona(seguimiento);
     renderSemaforo(metas, seguimiento);
 }
 
@@ -165,52 +165,46 @@ function renderChartCumplimiento(metas, seguimiento) {
     });
 }
 
-function renderChartTendencia(seguimiento) {
-    const ctx = document.getElementById('chartTendencia').getContext('2d');
-    if (chartTendencia) chartTendencia.destroy();
+function renderChartFQZona(seguimiento) {
+    const ctx = document.getElementById('chartFQZona').getContext('2d');
+    if (chartFQZona) chartFQZona.destroy();
 
-    const fechas = [...new Set(seguimiento.map(r => r.fechaCarga).filter(Boolean))].sort();
+    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    if (fechas.length === 0) {
-        chartTendencia = new Chart(ctx, {
-            type: 'line',
-            data: { labels: ['Sin datos'], datasets: [{ label: 'Sin datos', data: [0] }] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-        return;
-    }
+    const zonasFQ = APP.zonas.map(zona => {
+        const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
+        return sumarActividadZona(seg, 'FQ');
+    });
 
-    const datasets = [
-        { label: 'Consecutividad', key: 'Consec.', color: '#1a237e' },
-        { label: 'Nuevas', key: 'Nuevas', color: '#ff6f00' },
-        { label: 'PPDD', key: 'PPDD', color: '#2e7d32' }
-    ];
+    const colors = zonasFQ.map(v => v > 0 ? '#3949ab' : '#bdbdbd');
 
-    chartTendencia = new Chart(ctx, {
-        type: 'line',
+    chartFQZona = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: fechas,
-            datasets: datasets.map(ds => ({
-                label: ds.label,
-                data: fechas.map(f => {
-                    const rows = seguimiento.filter(r => r.fechaCarga === f);
-                    return rows.reduce((s, r) => s + (parseFloat(r[ds.key]) || 0), 0);
-                }),
-                borderColor: ds.color,
-                backgroundColor: ds.color + '20',
-                fill: false,
-                tension: 0.3,
-                pointRadius: 4
-            }))
+            labels: APP.zonas.map(z => z.length > 12 ? z.substring(0, 10) + '..' : z),
+            datasets: [{
+                label: 'FQ',
+                data: zonasFQ,
+                backgroundColor: colors,
+                borderWidth: 0,
+                borderRadius: 4
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'top' }
+                legend: { display: false }
             },
             scales: {
-                y: { beginAtZero: true }
+                y: { beginAtZero: true },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
+                    }
+                }
             }
         }
     });
