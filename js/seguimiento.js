@@ -36,6 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnRemoveFile').addEventListener('click', resetUpload);
     document.getElementById('btnCancelarCarga').addEventListener('click', resetUpload);
     document.getElementById('btnConfirmarCarga').addEventListener('click', confirmarCarga);
+    document.getElementById('btnLimpiarActividad').addEventListener('click', () => {
+        if (confirm('¿Seguro que deseas eliminar todos los datos de actividad cargados?')) {
+            APP.data.seguimiento = [];
+            saveLocalData();
+            showMessage('seguimientoMsg', 'Datos de actividad eliminados correctamente.', 'success');
+        }
+    });
 });
 
 let parsedExcelData = null;
@@ -162,16 +169,22 @@ async function confirmarCarga() {
         return;
     }
 
-    // Agregar fecha de carga y campana seleccionada
+    // Agregar fecha de carga y derivar campana de cada fila del Excel
     const fechaCarga = new Date().toISOString().split('T')[0];
-    const campanaSeleccionada = document.getElementById('segCampana').value;
-    const dataConFecha = parsedExcelData.map(row => ({ ...row, fechaCarga, campanaAsignada: campanaSeleccionada }));
-
-    // Reemplazar datos de la misma campana (no acumular)
     const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+    // Derivar campanaAsignada de la columna Campaña del Excel (ej: "PADRES 2026" -> "PADRES")
+    const dataConFecha = parsedExcelData.map(row => {
+        const campExcel = row['Campaña'] || row['Campana'] || '';
+        const campMatch = APP.campanas.find(c => norm(campExcel).includes(norm(c))) || campExcel;
+        return { ...row, fechaCarga, campanaAsignada: campMatch };
+    });
+
+    // Reemplazar datos de las campanas que vienen en el archivo (no acumular)
+    const campanasEnArchivo = [...new Set(dataConFecha.map(r => norm(r.campanaAsignada)))];
     APP.data.seguimiento = APP.data.seguimiento.filter(r => {
-        const camp = r.campanaAsignada || r['Campaña'] || r['Campana'] || '';
-        return !norm(camp).includes(norm(campanaSeleccionada));
+        const camp = norm(r.campanaAsignada || r['Campaña'] || r['Campana'] || '');
+        return !campanasEnArchivo.some(c => camp.includes(c));
     });
     APP.data.seguimiento = APP.data.seguimiento.concat(dataConFecha);
     saveLocalData();
