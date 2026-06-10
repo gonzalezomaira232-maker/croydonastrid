@@ -52,8 +52,8 @@ function initNavigation() {
 
 // ===== Selectores de mes/anio =====
 function initSelectors() {
-    const campanaSelects = document.querySelectorAll('#metaCampana, #zonaMetaCampana, #dashCampana, #segCampana');
-    const anioSelects = document.querySelectorAll('#metaAnio, #zonaMetaAnio, #dashAnio, #segAnio');
+    const campanaSelects = document.querySelectorAll('#metaCampana, #zonaMetaCampana, #dashCampana, #segCampana, #indCampana');
+    const anioSelects = document.querySelectorAll('#metaAnio, #zonaMetaAnio, #dashAnio, #segAnio, #indAnio');
     const now = new Date();
 
     campanaSelects.forEach(sel => {

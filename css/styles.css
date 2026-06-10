@@ -882,6 +882,14 @@ body {
     }
 }
 
+/* ===== Ranking ===== */
+.ranking-num {
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    width: 40px;
+}
+
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar {
     width: 6px;

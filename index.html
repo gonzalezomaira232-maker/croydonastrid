@@ -33,6 +33,10 @@
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard Regional</span>
             </li>
+            <li data-module="indicador">
+                <i class="fas fa-chart-bar"></i>
+                <span>Dashboard por Indicador</span>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <div class="connection-status" id="connectionStatus">
@@ -220,6 +224,47 @@
             </div>
         </section>
 
+        <!-- Dashboard por Indicador -->
+        <section id="module-indicador" class="module">
+            <div class="module-header">
+                <h1><i class="fas fa-chart-bar"></i> Dashboard por Indicador</h1>
+                <p>Ranking de zonas por indicador seleccionado</p>
+            </div>
+            <div class="controls-bar">
+                <div class="control-group">
+                    <label for="indCampana">Campana</label>
+                    <select id="indCampana"></select>
+                </div>
+                <div class="control-group">
+                    <label for="indAnio">Anio</label>
+                    <select id="indAnio"></select>
+                </div>
+                <div class="control-group">
+                    <label for="indKpi">Indicador</label>
+                    <select id="indKpi"></select>
+                </div>
+                <button class="btn btn-primary" id="btnConsultarIndicador">
+                    <i class="fas fa-search"></i> Consultar
+                </button>
+            </div>
+            <div id="indicadorMsg" class="message-area"></div>
+            <div class="table-container">
+                <table class="data-table" id="tablaIndicador">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Zona</th>
+                            <th>Meta</th>
+                            <th>Actividad</th>
+                            <th>Faltan</th>
+                            <th>% Cumplimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyIndicador"></tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Dashboard Regional -->
         <section id="module-dashboard" class="module">
             <div class="module-header">
@@ -299,6 +344,7 @@
     <script src="js/metas.js?v=3"></script>
     <script src="js/seguimiento.js?v=3"></script>
     <script src="js/zonas.js?v=3"></script>
+    <script src="js/indicador.js?v=3"></script>
     <script src="js/dashboard.js?v=3"></script>
 </body>
 </html>
