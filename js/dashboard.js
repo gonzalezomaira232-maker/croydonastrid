@@ -113,29 +113,29 @@ function renderChartCumplimiento(metas, seguimiento) {
 
     const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    const zonasPct = APP.zonas.map(zona => {
+    const zonasData = APP.zonas.map(zona => {
         const meta = metas.find(m => m.zona === zona);
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
-
-        if (!meta || !meta['PPDD']) return 0;
-
-        const actual = sumarActividadZona(seg, 'PPDD');
-        return calcPct(actual, meta['PPDD']);
+        const pct = (!meta || !meta['PPDD']) ? 0 : calcPct(sumarActividadZona(seg, 'PPDD'), meta['PPDD']);
+        return { zona, pct };
     });
 
-    const colors = zonasPct.map(p => {
-        if (p >= 90) return '#4caf50';
-        if (p >= 60) return '#ff9800';
+    // Ordenar de mayor a menor cumplimiento
+    zonasData.sort((a, b) => b.pct - a.pct);
+
+    const colors = zonasData.map(d => {
+        if (d.pct >= 90) return '#4caf50';
+        if (d.pct >= 60) return '#ff9800';
         return '#f44336';
     });
 
     chartCumplimiento = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: APP.zonas.map(z => z.length > 12 ? z.substring(0, 10) + '..' : z),
+            labels: zonasData.map(d => d.zona.length > 12 ? d.zona.substring(0, 10) + '..' : d.zona),
             datasets: [{
                 label: '% Cumplimiento',
-                data: zonasPct,
+                data: zonasData.map(d => d.pct),
                 backgroundColor: colors,
                 borderWidth: 0,
                 borderRadius: 4
