@@ -216,19 +216,17 @@ function renderChartFQZona(seguimiento) {
 function renderPodio(metas, seguimiento) {
     const container = document.getElementById('podioContainer');
     const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    const kpisDash = APP.kpis.filter(k => k !== 'Estencil Pas');
+    const kpisPodio = ['Crecimiento', 'PPDD', 'Consec.'];
     const colMap = {
-        'Consec.': 'Consec.', '% Consec.': '% Consec.', 'Nuevas': 'Nuevas',
-        'Crecimiento': 'Cmto.', 'PPDD': 'PPDD', 'Recuperada': 'Recuperadas',
-        'Reingresos': 'Reingresos', 'Vr. Venta': 'Vr. Venta', 'VOP': 'V.O.P'
+        'Consec.': 'Consec.', 'Crecimiento': 'Cmto.', 'PPDD': 'PPDD'
     };
-    const pctKpis = ['% Consec.'];
+    const pctKpis = [];
     const medals = ['🥇', '🥈', '🥉'];
     const classes = ['gold', 'silver', 'bronze'];
     // Orden visual: 2do, 1ro, 3ro para efecto podio
     const podioOrder = [1, 0, 2];
 
-    container.innerHTML = kpisDash.map(kpi => {
+    container.innerHTML = kpisPodio.map(kpi => {
         const isPct = pctKpis.includes(kpi);
         const colSeg = colMap[kpi] || kpi;
 
