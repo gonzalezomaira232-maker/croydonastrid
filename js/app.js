@@ -58,12 +58,43 @@ function diasHabilesRestantes(fechaHasta) {
 
 // ===== Inicializacion =====
 document.addEventListener('DOMContentLoaded', () => {
+    initLogin();
     initNavigation();
     initSelectors();
     initConfigModal();
     loadLocalData();
     updateConnectionStatus();
 });
+
+// ===== Login =====
+function initLogin() {
+    const overlay = document.getElementById('loginOverlay');
+    if (sessionStorage.getItem('loggedIn')) {
+        overlay.style.display = 'none';
+        return;
+    }
+
+    const btnLogin = document.getElementById('btnLogin');
+    const userInput = document.getElementById('loginUser');
+    const passInput = document.getElementById('loginPass');
+    const errorMsg = document.getElementById('loginError');
+
+    function attemptLogin() {
+        const user = userInput.value;
+        const pass = passInput.value;
+        if (user === 'ZONAC2' && pass === 'ZONAC2') {
+            sessionStorage.setItem('loggedIn', 'true');
+            overlay.style.display = 'none';
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    btnLogin.addEventListener('click', attemptLogin);
+    passInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') attemptLogin();
+    });
+}
 
 // ===== Navegacion =====
 function initNavigation() {
