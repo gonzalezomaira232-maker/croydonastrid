@@ -10,6 +10,29 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-chart-line"></i>
+                <h2>Seguimiento Comercial</h2>
+                <p>Ingrese sus credenciales</p>
+            </div>
+            <div class="login-form">
+                <div class="login-field">
+                    <label for="loginUser">Usuario</label>
+                    <input type="text" id="loginUser" placeholder="Usuario" autocomplete="off">
+                </div>
+                <div class="login-field">
+                    <label for="loginPass">Contraseña</label>
+                    <input type="password" id="loginPass" placeholder="Contraseña">
+                </div>
+                <div id="loginError" class="login-error" style="display:none;">Usuario o contraseña incorrectos</div>
+                <button id="btnLogin" class="login-btn">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <nav id="sidebar" class="sidebar">
         <div class="sidebar-header">
