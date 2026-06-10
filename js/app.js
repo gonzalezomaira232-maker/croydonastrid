@@ -15,6 +15,47 @@ const APP = {
     }
 };
 
+// ===== Festivos Colombia =====
+APP.festivosColombia = new Set([
+    // 2025
+    '2025-01-01','2025-01-06','2025-01-13','2025-03-24','2025-04-17','2025-04-18',
+    '2025-05-01','2025-06-02','2025-06-23','2025-06-30','2025-07-20','2025-08-07',
+    '2025-08-18','2025-10-13','2025-11-03','2025-11-17','2025-12-08','2025-12-25',
+    // 2026
+    '2026-01-01','2026-01-05','2026-01-12','2026-03-23','2026-04-02','2026-04-03',
+    '2026-05-01','2026-05-18','2026-06-08','2026-06-15','2026-06-22','2026-07-20',
+    '2026-08-07','2026-08-17','2026-10-12','2026-11-02','2026-11-16','2026-12-08',
+    '2026-12-25',
+    // 2027
+    '2027-01-01','2027-01-11','2027-03-22','2027-03-25','2027-03-26','2027-05-01',
+    '2027-05-17','2027-06-07','2027-06-14','2027-06-28','2027-07-20','2027-08-07',
+    '2027-08-16','2027-10-18','2027-11-01','2027-11-15','2027-12-08','2027-12-25'
+]);
+
+function diasHabilesRestantes(fechaHasta) {
+    if (!fechaHasta) return 0;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const hasta = new Date(fechaHasta + 'T00:00:00');
+    if (hasta < hoy) return 0;
+
+    let count = 0;
+    const d = new Date(hoy);
+    d.setDate(d.getDate() + 1); // desde mañana
+
+    while (d <= hasta) {
+        const dow = d.getDay(); // 0=dom
+        if (dow !== 0) { // lun-sab
+            const iso = d.toISOString().slice(0, 10);
+            if (!APP.festivosColombia.has(iso)) {
+                count++;
+            }
+        }
+        d.setDate(d.getDate() + 1);
+    }
+    return count;
+}
+
 // ===== Inicializacion =====
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
