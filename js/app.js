@@ -62,15 +62,43 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initSelectors();
     initConfigModal();
+    initAdmin();
     loadLocalData();
     updateConnectionStatus();
 });
 
+// ===== Usuarios =====
+function initDefaultUsers() {
+    const stored = localStorage.getItem('appUsers');
+    if (!stored) {
+        const defaults = [
+            { username: 'ADMIN', password: 'ADMIN', role: 'admin' },
+            { username: 'ZONAC2', password: 'ZONAC2', role: 'user' }
+        ];
+        localStorage.setItem('appUsers', JSON.stringify(defaults));
+    }
+}
+
+function getUsers() {
+    return JSON.parse(localStorage.getItem('appUsers') || '[]');
+}
+
+function saveUsers(users) {
+    localStorage.setItem('appUsers', JSON.stringify(users));
+}
+
+function showAdminElements() {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.add('visible'));
+}
+
 // ===== Login =====
 function initLogin() {
+    initDefaultUsers();
     const overlay = document.getElementById('loginOverlay');
+
     if (sessionStorage.getItem('loggedIn')) {
         overlay.style.display = 'none';
+        if (sessionStorage.getItem('userRole') === 'admin') showAdminElements();
         return;
     }
 
@@ -80,11 +108,16 @@ function initLogin() {
     const errorMsg = document.getElementById('loginError');
 
     function attemptLogin() {
-        const user = userInput.value;
+        const user = userInput.value.trim();
         const pass = passInput.value;
-        if (user === 'ZONAC2' && pass === 'ZONAC2') {
+        const users = getUsers();
+        const found = users.find(u => u.username.toUpperCase() === user.toUpperCase() && u.password === pass);
+        if (found) {
             sessionStorage.setItem('loggedIn', 'true');
+            sessionStorage.setItem('username', found.username);
+            sessionStorage.setItem('userRole', found.role);
             overlay.style.display = 'none';
+            if (found.role === 'admin') showAdminElements();
         } else {
             errorMsg.style.display = 'block';
         }
@@ -94,6 +127,94 @@ function initLogin() {
     passInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') attemptLogin();
     });
+}
+
+// ===== Admin Panel =====
+function initAdmin() {
+    const btnCreate = document.getElementById('btnCreateUser');
+    if (!btnCreate) return;
+
+    btnCreate.addEventListener('click', () => {
+        const username = document.getElementById('newUsername').value.trim().toUpperCase();
+        const password = document.getElementById('newPassword').value;
+        const role = document.getElementById('newRole').value;
+
+        if (!username || !password) {
+            showMessage('adminMsg', 'Usuario y contrasena son obligatorios.', 'error');
+            return;
+        }
+
+        const users = getUsers();
+        if (users.find(u => u.username.toUpperCase() === username)) {
+            showMessage('adminMsg', 'El usuario ya existe.', 'error');
+            return;
+        }
+
+        users.push({ username, password, role });
+        saveUsers(users);
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('newRole').value = 'user';
+        showMessage('adminMsg', `Usuario "${username}" creado correctamente.`, 'success');
+        renderUsersTable();
+    });
+
+    renderUsersTable();
+}
+
+function renderUsersTable() {
+    const tbody = document.getElementById('bodyUsuarios');
+    if (!tbody) return;
+    const users = getUsers();
+    const currentUser = sessionStorage.getItem('username');
+
+    tbody.innerHTML = users.map(u => {
+        const isSelf = u.username === currentUser;
+        const roleLabel = u.role === 'admin' ? 'Administrador' : 'Usuario';
+        const toggleRoleBtn = isSelf ? '' :
+            `<button class="btn btn-sm btn-outline" onclick="toggleUserRole('${u.username}')"><i class="fas fa-exchange-alt"></i> Cambiar rol</button>`;
+        const resetBtn = isSelf ? '' :
+            `<button class="btn btn-sm btn-primary" onclick="resetUserPassword('${u.username}')"><i class="fas fa-key"></i> Reset pass</button>`;
+        const deleteBtn = isSelf ? '' :
+            `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')"><i class="fas fa-trash"></i></button>`;
+        return `<tr>
+            <td>${u.username}${isSelf ? ' (tu)' : ''}</td>
+            <td>${roleLabel}</td>
+            <td>${toggleRoleBtn} ${resetBtn} ${deleteBtn}</td>
+        </tr>`;
+    }).join('');
+}
+
+function toggleUserRole(username) {
+    const users = getUsers();
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.role = user.role === 'admin' ? 'user' : 'admin';
+        saveUsers(users);
+        renderUsersTable();
+        showMessage('adminMsg', `Rol de "${username}" cambiado a ${user.role === 'admin' ? 'Administrador' : 'Usuario'}.`, 'success');
+    }
+}
+
+function resetUserPassword(username) {
+    const newPass = prompt(`Nueva contrasena para "${username}":`);
+    if (!newPass) return;
+    const users = getUsers();
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.password = newPass;
+        saveUsers(users);
+        showMessage('adminMsg', `Contrasena de "${username}" actualizada.`, 'success');
+    }
+}
+
+function deleteUser(username) {
+    if (!confirm(`¿Eliminar al usuario "${username}"?`)) return;
+    let users = getUsers();
+    users = users.filter(u => u.username !== username);
+    saveUsers(users);
+    renderUsersTable();
+    showMessage('adminMsg', `Usuario "${username}" eliminado.`, 'success');
 }
 
 // ===== Navegacion =====
