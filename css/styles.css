@@ -1009,3 +1009,63 @@ body {
 .login-btn:hover {
     background: var(--primary-light);
 }
+
+/* ===== Admin Panel ===== */
+.admin-only {
+    display: none !important;
+}
+
+.admin-only.visible {
+    display: flex !important;
+}
+
+.admin-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.admin-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.admin-section h3 {
+    font-size: 1.05rem;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.admin-section h3 i {
+    color: var(--accent);
+    margin-right: 6px;
+}
+
+.admin-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.admin-form .form-input {
+    width: auto;
+    min-width: 160px;
+}
+
+#tablaUsuarios .btn {
+    margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+    .admin-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-form .form-input {
+        width: 100%;
+    }
+}
