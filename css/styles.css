@@ -1010,6 +1010,99 @@ body {
     background: var(--primary-light);
 }
 
+/* ===== Podio ===== */
+.podio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.podio-card {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--gray-200);
+}
+
+.podio-card .podio-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.podio-places {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    min-height: 140px;
+}
+
+.podio-place {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+}
+
+.podio-bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 4px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.podio-place.gold .podio-bar {
+    background: linear-gradient(180deg, #ffd700, #daa520);
+    height: 100px;
+}
+
+.podio-place.silver .podio-bar {
+    background: linear-gradient(180deg, #c0c0c0, #a0a0a0);
+    height: 75px;
+}
+
+.podio-place.bronze .podio-bar {
+    background: linear-gradient(180deg, #cd7f32, #a0622e);
+    height: 55px;
+}
+
+.podio-bar .podio-medal {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.podio-bar .podio-value {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.podio-zone-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-top: 6px;
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+@media (max-width: 768px) {
+    .podio-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
 /* ===== Admin Panel ===== */
 .admin-only {
     display: none !important;

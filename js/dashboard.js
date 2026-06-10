@@ -22,6 +22,7 @@ function refreshDashboard() {
     renderDashTotales(seguimiento, metas);
     renderChartCumplimiento(metas, seguimiento);
     renderChartFQZona(seguimiento);
+    renderPodio(metas, seguimiento);
     renderSemaforo(metas, seguimiento);
 }
 
@@ -210,6 +211,55 @@ function renderChartFQZona(seguimiento) {
             }
         }
     });
+}
+
+function renderPodio(metas, seguimiento) {
+    const container = document.getElementById('podioContainer');
+    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const kpisDash = APP.kpis.filter(k => k !== 'Estencil Pas');
+    const colMap = {
+        'Consec.': 'Consec.', '% Consec.': '% Consec.', 'Nuevas': 'Nuevas',
+        'Crecimiento': 'Cmto.', 'PPDD': 'PPDD', 'Recuperada': 'Recuperadas',
+        'Reingresos': 'Reingresos', 'Vr. Venta': 'Vr. Venta', 'VOP': 'V.O.P'
+    };
+    const pctKpis = ['% Consec.'];
+    const medals = ['🥇', '🥈', '🥉'];
+    const classes = ['gold', 'silver', 'bronze'];
+    // Orden visual: 2do, 1ro, 3ro para efecto podio
+    const podioOrder = [1, 0, 2];
+
+    container.innerHTML = kpisDash.map(kpi => {
+        const isPct = pctKpis.includes(kpi);
+        const colSeg = colMap[kpi] || kpi;
+
+        const ranking = APP.zonas.map(zona => {
+            const meta = metas.find(m => m.zona === zona);
+            const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
+            const metaVal = meta ? (parseFloat(meta[kpi]) || 0) : 0;
+            const actual = isPct ? promediarActividadZona(seg, colSeg) : sumarActividadZona(seg, colSeg);
+            const pct = calcPct(actual, metaVal);
+            return { zona, actual, pct };
+        }).sort((a, b) => b.pct - a.pct).slice(0, 3);
+
+        // Asegurar que haya 3 posiciones
+        while (ranking.length < 3) ranking.push({ zona: '-', actual: 0, pct: 0 });
+
+        const places = podioOrder.map(i => {
+            const r = ranking[i];
+            return `<div class="podio-place ${classes[i]}">
+                <div class="podio-bar">
+                    <span class="podio-medal">${medals[i]}</span>
+                    <span class="podio-value">${r.pct}%</span>
+                </div>
+                <div class="podio-zone-name">${r.zona}</div>
+            </div>`;
+        }).join('');
+
+        return `<div class="podio-card">
+            <div class="podio-title">${kpi}</div>
+            <div class="podio-places">${places}</div>
+        </div>`;
+    }).join('');
 }
 
 function renderSemaforo(metas, seguimiento) {
