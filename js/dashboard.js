@@ -36,6 +36,7 @@ function renderDashTotales(seguimiento, metas) {
         'Reingresos': 'Reingresos', 'Vr. Venta': 'Vr. Venta', 'VOP': 'V.O.P'
     };
     const pctKpis = ['% Consec.'];
+    const avgMetaKpis = ['VOP'];
 
     const normDash = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
@@ -63,6 +64,23 @@ function renderDashTotales(seguimiento, metas) {
                 ? promediosPorZona.reduce((a, b) => a + b, 0) / promediosPorZona.length
                 : 0;
             console.log(`Dashboard ${kpi}: meta promedio=${metaTotal}, actual promedio=${actualTotal}, zonas=${promediosPorZona.length}`);
+            falta = Math.max(metaTotal - actualTotal, 0);
+            pct = calcPct(actualTotal, metaTotal);
+        } else if (avgMetaKpis.includes(kpi)) {
+            // VOP: promediar meta, promediar actividad
+            const metasConValor = metas.filter(m => parseFloat(m[kpi]) > 0);
+            metaTotal = metasConValor.length > 0
+                ? metasConValor.reduce((s, m) => s + (parseFloat(m[kpi]) || 0), 0) / metasConValor.length
+                : 0;
+            const valoresPorZona = [];
+            APP.zonas.forEach(zona => {
+                const segZona = seguimiento.filter(r => normDash(r['CZ-Zona'] || r.Zona || r.zona || '') === normDash(zona));
+                const val = sumarActividadZona(segZona, colSeg);
+                if (val > 0) valoresPorZona.push(val);
+            });
+            actualTotal = valoresPorZona.length > 0
+                ? valoresPorZona.reduce((a, b) => a + b, 0) / valoresPorZona.length
+                : 0;
             falta = Math.max(metaTotal - actualTotal, 0);
             pct = calcPct(actualTotal, metaTotal);
         } else {
