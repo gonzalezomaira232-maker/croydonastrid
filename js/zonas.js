@@ -91,10 +91,11 @@ function mostrarDetalleZona(zona) {
     const metas = APP.data.metas[key] || [];
     const metaZona = metas.find(m => m.zona === zona) || {};
 
-    // Seguimiento filtrado por zona Y campana (parcial, ej: "MADRES 2026" contiene "MADRES")
+    // Seguimiento filtrado por zona, campana Y anio
     const seguimiento = APP.data.seguimiento.filter(r =>
         normalize(getSegZona(r)) === normalize(zona) &&
-        normalize(getSegCampana(r)).includes(normalize(campana))
+        normalize(getSegCampana(r)).includes(normalize(campana)) &&
+        (!r.anioActividad || String(r.anioActividad) === String(anio))
     );
 
     // Tabla Meta vs Actividad vs Falta vs Cumplimiento

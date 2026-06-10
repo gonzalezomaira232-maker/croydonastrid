@@ -173,11 +173,13 @@ async function confirmarCarga() {
     const fechaCarga = new Date().toISOString().split('T')[0];
     const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    // Derivar campanaAsignada de la columna Campaña del Excel (ej: "PADRES 2026" -> "PADRES")
+    // Derivar campanaAsignada y anioActividad de la columna Campaña del Excel (ej: "PADRES 2026" -> "PADRES", 2026)
     const dataConFecha = parsedExcelData.map(row => {
         const campExcel = row['Campaña'] || row['Campana'] || '';
         const campMatch = APP.campanas.find(c => norm(campExcel).includes(norm(c))) || campExcel;
-        return { ...row, fechaCarga, campanaAsignada: campMatch };
+        const anioMatch = campExcel.match(/\d{4}/);
+        const anioActividad = anioMatch ? parseInt(anioMatch[0]) : new Date().getFullYear();
+        return { ...row, fechaCarga, campanaAsignada: campMatch, anioActividad };
     });
 
     // Reemplazar datos de las campanas que vienen en el archivo (no acumular)

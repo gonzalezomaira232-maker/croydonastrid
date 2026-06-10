@@ -15,7 +15,8 @@ function refreshDashboard() {
     const normCampana = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     const seguimiento = APP.data.seguimiento.filter(r => {
         const segCamp = r.campanaAsignada || r['Campaña'] || r['Campana'] || r.campana || '';
-        return normCampana(segCamp).includes(normCampana(campana));
+        return normCampana(segCamp).includes(normCampana(campana)) &&
+            (!r.anioActividad || String(r.anioActividad) === String(anio));
     });
 
     renderDashTotales(seguimiento, metas);
