@@ -173,7 +173,7 @@ function renderChartFQZona(seguimiento) {
 
     const zonasFQ = APP.zonas.map(zona => {
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
-        return sumarActividadZona(seg, 'FQ');
+        return Math.round(promediarActividadZona(seg, 'FQ') * 100) / 100;
     });
 
     const colors = zonasFQ.map(v => v > 0 ? '#3949ab' : '#bdbdbd');
