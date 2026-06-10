@@ -27,6 +27,17 @@ function renderIndicador() {
         return;
     }
 
+    // Obtener fechaHasta de los registros de seguimiento para esta campana/anio
+    const segCampana = APP.data.seguimiento.filter(r =>
+        normalize(getSegCampana(r)).includes(normalize(campana)) &&
+        (!r.anioActividad || String(r.anioActividad) === String(anio))
+    );
+    let fechaHasta = null;
+    for (let i = segCampana.length - 1; i >= 0; i--) {
+        if (segCampana[i].fechaHasta) { fechaHasta = segCampana[i].fechaHasta; break; }
+    }
+    const diasRestantes = diasHabilesRestantes(fechaHasta);
+
     // Calcular datos por zona
     const rows = APP.zonas.map(zona => {
         const metaZona = metas.find(m => m.zona === zona) || {};
@@ -43,8 +54,9 @@ function renderIndicador() {
             : sumarActividadZona(seguimiento, col);
         const falta = Math.max(metaVal - actual, 0);
         const pct = calcPct(actual, metaVal);
+        const xDia = diasRestantes > 0 ? Math.ceil(falta / diasRestantes) : null;
 
-        return { zona, metaVal, actual, falta, pct };
+        return { zona, metaVal, actual, falta, pct, xDia };
     });
 
     // Ordenar de mayor a menor cumplimiento
@@ -54,12 +66,14 @@ function renderIndicador() {
     const tbody = document.getElementById('bodyIndicador');
     tbody.innerHTML = rows.map((r, i) => {
         const cls = semaforoCellClass(r.pct);
+        const xDiaStr = r.xDia != null ? formatNumber(r.xDia, isPct) : '-';
         return `<tr>
             <td class="ranking-num">${i + 1}</td>
             <td><strong>${r.zona}</strong></td>
             <td>${formatNumber(r.metaVal, isPct)}</td>
             <td>${formatNumber(r.actual, isPct)}</td>
             <td>${formatNumber(r.falta, isPct)}</td>
+            <td>${xDiaStr}</td>
             <td class="${cls}">${r.pct}%</td>
         </tr>`;
     }).join('');
