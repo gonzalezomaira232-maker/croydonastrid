@@ -36,6 +36,9 @@ async function cargarMetas() {
             if (result.success && result.data && result.data.length > 0) {
                 APP.data.metas[key] = result.data;
                 saveLocalData();
+                updateZonasFromMetas();
+                renderMetasTable();
+                if (typeof renderZonasGrid === 'function') renderZonasGrid();
                 fillMetasTable(result.data);
                 showMessage('metasMsg', `Metas cargadas de Google Sheets para ${campana} ${anio}`, 'success');
                 return;
@@ -47,6 +50,9 @@ async function cargarMetas() {
 
     // Cargar de datos locales
     if (APP.data.metas[key]) {
+        updateZonasFromMetas();
+        renderMetasTable();
+        if (typeof renderZonasGrid === 'function') renderZonasGrid();
         fillMetasTable(APP.data.metas[key]);
         showMessage('metasMsg', `Metas cargadas de datos locales para ${campana} ${anio}`, 'info');
     } else {
@@ -177,15 +183,29 @@ function procesarExcelMetas(e) {
                 console.warn('KPIs NO encontrados en Excel:', kpisNoEncontrados);
             }
 
-            // Mapear datos del Excel a las zonas de la app
+            // Extraer todas las zonas del Excel y actualizar APP.zonas
+            const zonasExcel = [];
+            rows.forEach(row => {
+                const zonaExcel = String(row[zonaCol] || '').trim();
+                if (zonaExcel && !zonasExcel.find(z => z === zonaExcel)) {
+                    zonasExcel.push(zonaExcel);
+                }
+            });
+
+            if (zonasExcel.length > 0) {
+                APP.zonas = zonasExcel.sort((a, b) => a.localeCompare(b, 'es'));
+                console.log('Zonas actualizadas desde Excel:', APP.zonas);
+                // Re-renderizar tabla de metas y grid de zonas
+                renderMetasTable();
+                if (typeof renderZonasGrid === 'function') renderZonasGrid();
+            }
+
+            // Mapear datos del Excel a las zonas
             let zonasEncontradas = 0;
-            let zonasNoEncontradas = [];
+            const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
             rows.forEach(row => {
                 const zonaExcel = String(row[zonaCol] || '').trim();
-
-                // Buscar coincidencia exacta (ignorando mayusculas/tildes)
-                const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
                 const zonaApp = APP.zonas.find(z => normalize(z) === normalize(zonaExcel));
 
                 if (zonaApp) {
@@ -197,24 +217,19 @@ function procesarExcelMetas(e) {
                         }
                     });
                     zonasEncontradas++;
-                } else if (zonaExcel) {
-                    zonasNoEncontradas.push(zonaExcel);
                 }
             });
 
-            let msg = `Excel cargado: ${zonasEncontradas} zonas de ${rows.length} filas.`;
+            let msg = `Excel cargado: ${zonasEncontradas} zonas encontradas.`;
             if (kpisNoEncontrados.length > 0) {
                 msg += ` KPIs no encontrados: ${kpisNoEncontrados.join(', ')}.`;
             }
-            if (zonasNoEncontradas.length > 0) {
-                msg += ` Zonas no reconocidas: ${zonasNoEncontradas.join(', ')}`;
-            }
-            if (zonasNoEncontradas.length > 0 || kpisNoEncontrados.length > 0) {
+            if (kpisNoEncontrados.length > 0) {
                 showMessage('metasMsg', msg, 'info');
             } else {
                 showMessage('metasMsg', msg, 'success');
             }
-            console.log('Zonas encontradas:', zonasEncontradas, '| No reconocidas:', zonasNoEncontradas);
+            console.log('Zonas encontradas:', zonasEncontradas);
 
         } catch (err) {
             showMessage('metasMsg', 'Error al leer el archivo: ' + err.message, 'error');

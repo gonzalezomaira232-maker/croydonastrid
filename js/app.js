@@ -1,7 +1,8 @@
 // ===== Configuracion Global =====
 const APP = {
     sheetUrl: localStorage.getItem('sheetUrl') || '',
-    zonas: [
+    zonas: [],
+    zonasDefault: [
         'Aguazul', 'Arauca', 'Bogota 3', 'Bogota 6', 'Bogota 13', 'Bogota 14',
         'Bogota 30', 'Bogota 32', 'Bogota - Suba 2', 'Chiquinquirá', 'Duitama',
         'Sogamoso', 'Tunja', 'Valledupar 2', 'Valledupar', 'Yopal 1'
@@ -361,6 +362,25 @@ function loadLocalData() {
             console.error('Error cargando datos locales:', e);
         }
     }
+    updateZonasFromMetas();
+}
+
+// Extraer zonas dinamicamente de los datos de metas guardados
+function updateZonasFromMetas() {
+    const allZonas = new Set();
+    Object.values(APP.data.metas).forEach(metasArr => {
+        if (Array.isArray(metasArr)) {
+            metasArr.forEach(m => {
+                if (m.zona) allZonas.add(m.zona);
+            });
+        }
+    });
+    if (allZonas.size > 0) {
+        APP.zonas = [...allZonas].sort((a, b) => a.localeCompare(b, 'es'));
+    } else {
+        APP.zonas = [...APP.zonasDefault];
+    }
+    console.log('Zonas activas:', APP.zonas.length, APP.zonas);
 }
 
 // ===== Utilidades =====
