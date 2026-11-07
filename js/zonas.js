@@ -91,12 +91,15 @@ function mostrarDetalleZona(zona) {
     const metas = APP.data.metas[key] || [];
     const metaZona = metas.find(m => m.zona === zona) || {};
 
-    // Seguimiento filtrado por zona, campana Y anio
-    const seguimiento = APP.data.seguimiento.filter(r =>
-        normalize(getSegZona(r)) === normalize(zona) &&
-        normalize(getSegCampana(r)).includes(normalize(campana)) &&
-        (!r.anioActividad || String(r.anioActividad) === String(anio))
-    );
+    // Seguimiento filtrado por zona, campana exacta Y anio
+    const normCampana = normalize(campana);
+    const seguimiento = APP.data.seguimiento.filter(r => {
+        if (normalize(getSegZona(r)) !== normalize(zona)) return false;
+        if (r.anioActividad && String(r.anioActividad) !== String(anio)) return false;
+        // Comparar campana exacta para evitar que "NAVIDAD" matchee "PRE-NAVIDAD"
+        const campRow = normalize(getSegCampana(r));
+        return campRow === normCampana || campRow === normCampana + ' ' + anio;
+    });
 
     // Tabla Meta vs Actividad vs Falta vs Cumplimiento
     renderMetaVsActividad(metaZona, seguimiento);
