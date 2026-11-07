@@ -383,6 +383,9 @@ function updateZonasFromMetas() {
     console.log('Zonas activas:', APP.zonas.length, APP.zonas);
 }
 
+// Mapa de codigo de zona -> nombre de zona (se llena al cargar metas o calculador)
+APP.zonaCodeMap = {}; // ej: { 'B03': 'Bogota - Suba 3', 'B52': 'Bogota Suba 2' }
+
 // ===== Normalizacion global =====
 // Normaliza nombres de zonas: quita acentos, guiones, espacios extra, minusculas
 function normalizeZona(s) {

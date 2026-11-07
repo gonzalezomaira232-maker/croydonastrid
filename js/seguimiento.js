@@ -228,13 +228,21 @@ async function confirmarCarga() {
     const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
     // Derivar campanaAsignada y anioActividad de la columna Campaña del Excel (ej: "PADRES 2026" -> "PADRES", 2026)
+    // Buscar campana mas larga primero para evitar que "NAVIDAD" matchee "PRE-NAVIDAD"
+    const campanasSorted = [...APP.campanas].sort((a, b) => b.length - a.length);
+
     const dataConFecha = parsedExcelData.map(row => {
         const campExcel = row['Campaña'] || row['Campana'] || '';
-        // Buscar campana mas larga primero para evitar que "NAVIDAD" matchee "PRE-NAVIDAD"
-        const campanasSorted = [...APP.campanas].sort((a, b) => b.length - a.length);
         const campMatch = campanasSorted.find(c => norm(campExcel).includes(norm(c))) || campExcel;
         const anioMatch = campExcel.match(/\d{4}/);
         const anioActividad = anioMatch ? parseInt(anioMatch[0]) : new Date().getFullYear();
+
+        // Renombrar CZ-Zona usando codigo de zona si hay mapa disponible
+        const codigoZona = String(row['Zona'] || '').trim().toUpperCase();
+        if (codigoZona && APP.zonaCodeMap[codigoZona]) {
+            row['CZ-Zona'] = APP.zonaCodeMap[codigoZona];
+        }
+
         return { ...row, fechaCarga, campanaAsignada: campMatch, anioActividad,
             fechaDesde: tempFechaDesde, fechaHasta: tempFechaHasta };
     });
@@ -243,7 +251,7 @@ async function confirmarCarga() {
     const campanasEnArchivo = [...new Set(dataConFecha.map(r => norm(r.campanaAsignada)))];
     APP.data.seguimiento = APP.data.seguimiento.filter(r => {
         const camp = norm(r.campanaAsignada || r['Campaña'] || r['Campana'] || '');
-        return !campanasEnArchivo.some(c => camp.includes(c));
+        return !campanasEnArchivo.includes(camp);
     });
     APP.data.seguimiento = APP.data.seguimiento.concat(dataConFecha);
     saveLocalData();
