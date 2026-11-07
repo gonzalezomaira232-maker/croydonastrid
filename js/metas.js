@@ -231,21 +231,31 @@ async function parseActividadAcumulada(file) {
         const zonaCol = czZonaCol || codigoCol;
         if (!zonaCol) { showMessage('calcMetasMsg', 'ActAcum: no se encontro columna de zona.', 'error'); return; }
 
-        // Solo tomar la primera campana de cada zona (la mas reciente, que esta primero)
+        // Tomar la SEGUNDA fila de cada zona (campana anterior, ej: PRE-NAVIDAD)
+        // La primera fila es la campana actual (ej: NAVIDAD) que apenas inicia
+        // La segunda fila es la campana anterior con datos reales para calcular metas
         const dataMap = {};
+        const seenOnce = {};
         rows.forEach(row => {
             const zona = String(row[czZonaCol] || '').trim();
             const codigo = codigoCol ? String(row[codigoCol] || '').trim().toUpperCase() : '';
             if (!zona) return;
-            const activas = parseFloat(row[activasCol]) || 0;
-            if (activas === 0 && !row[activasCol]) return;
-            // Usar la primera fila de cada zona (la campana actual)
             const key = codigo || zona;
-            if (dataMap[key]) return;
+            if (dataMap[key]) return; // Ya tenemos la segunda fila
+            if (!seenOnce[key]) {
+                // Primera fila (campana actual) - saltar
+                seenOnce[key] = true;
+                const campana = campanaCol ? String(row[campanaCol] || '').trim() : '';
+                console.log(`ActAcum: saltando primera fila de ${key} (${campana})`);
+                return;
+            }
+            // Segunda fila (campana anterior) - usar esta
+            const campana = campanaCol ? String(row[campanaCol] || '').trim() : '';
+            console.log(`ActAcum: usando fila anterior de ${key} (${campana})`);
             dataMap[key] = {
                 zona: zona,
                 codigo: codigo,
-                activas: activas,
+                activas: parseFloat(row[activasCol]) || 0,
                 inactivas: parseFloat(row[inactivasCol]) || 0,
                 estencil: parseFloat(row[estencilCol]) || 0,
                 vop: parseFloat(row[vopCol]) || 0,
