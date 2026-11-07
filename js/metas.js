@@ -159,18 +159,26 @@ async function parseArchivoMetas(file) {
         const cols = Object.keys(rows[0]);
         console.log('Archivo Metas - columnas:', cols);
 
-        const zonaCol = findCol(cols, ['CZ-Zona', 'Zona']);
+        const zonaCol = findCol(cols, ['CZ-Zona']);
+        const codigoCol = findCol(cols, ['ZONA']);
         const consecCol = findCol(cols, ['CONSECUTIVIDAD', '% Consec.', '% Consec', 'Consec']);
         const nuevasCol = findCol(cols, ['NUEVAS']);
         const crecCol = findCol(cols, ['CRECIMIENTO']);
         const pedidosCol = findCol(cols, ['PEDIDOS', 'PPDD']);
 
-        if (!zonaCol) { showMessage('calcMetasMsg', 'Metas: no se encontro columna de zona.', 'error'); return; }
+        // Si no hay CZ-Zona, usar ZONA como nombre
+        const nameCol = zonaCol || codigoCol;
+        if (!nameCol) { showMessage('calcMetasMsg', 'Metas: no se encontro columna de zona.', 'error'); return; }
 
         const dataMap = {};
         rows.forEach(row => {
-            const zona = String(row[zonaCol] || '').trim();
+            const zona = String(row[nameCol] || '').trim();
             if (!zona) return;
+            // Guardar mapa codigo -> nombre para cruzar con actividad
+            const codigo = codigoCol ? String(row[codigoCol] || '').trim() : '';
+            if (codigo && zonaCol) {
+                APP.zonaCodeMap[codigo.toUpperCase()] = zona;
+            }
             let consec = parseFloat(row[consecCol]) || 0;
             // Si viene como decimal (ej: 0.78), es porcentaje
             if (consec > 0 && consec <= 1) consec = consec; // mantener como decimal
