@@ -184,6 +184,7 @@ async function parseArchivoMetas(file) {
             if (consec > 0 && consec <= 1) consec = consec; // mantener como decimal
             else if (consec > 1) consec = consec / 100; // convertir 78 -> 0.78
             dataMap[zona] = {
+                codigo: codigo,
                 pctConsec: consec,
                 nuevas: parseFloat(row[nuevasCol]) || 0,
                 crecimiento: parseFloat(row[crecCol]) || 0,
@@ -217,23 +218,33 @@ async function parseActividadAcumulada(file) {
         const cols = Object.keys(rows[0]);
         console.log('ActAcum - columnas:', cols);
 
-        const zonaCol = findCol(cols, ['CZ-Zona', 'Zona']);
+        const czZonaCol = findCol(cols, ['CZ-Zona']);
+        const codigoCol = findCol(cols, ['Zona']);
         const activasCol = findCol(cols, ['Activas']);
         const inactivasCol = findCol(cols, ['Inactivas 1', 'Inactivas']);
         const estencilCol = findCol(cols, ['Estencil']);
         const vopCol = findCol(cols, ['V.O.P', 'VOP']);
         const vrVentaCol = findCol(cols, ['Vr. Venta', 'Vr Venta']);
         const ppddCol = findCol(cols, ['PPDD']);
+        const campanaCol = findCol(cols, ['Campaña', 'Campana']);
 
+        const zonaCol = czZonaCol || codigoCol;
         if (!zonaCol) { showMessage('calcMetasMsg', 'ActAcum: no se encontro columna de zona.', 'error'); return; }
 
+        // Solo tomar la primera campana de cada zona (la mas reciente, que esta primero)
         const dataMap = {};
         rows.forEach(row => {
-            const zona = String(row[zonaCol] || '').trim();
+            const zona = String(row[czZonaCol] || '').trim();
+            const codigo = codigoCol ? String(row[codigoCol] || '').trim().toUpperCase() : '';
             if (!zona) return;
             const activas = parseFloat(row[activasCol]) || 0;
-            if (activas === 0 && !row[activasCol]) return; // Saltar zonas vacias (sin datos)
-            dataMap[zona] = {
+            if (activas === 0 && !row[activasCol]) return;
+            // Usar la primera fila de cada zona (la campana actual)
+            const key = codigo || zona;
+            if (dataMap[key]) return;
+            dataMap[key] = {
+                zona: zona,
+                codigo: codigo,
                 activas: activas,
                 inactivas: parseFloat(row[inactivasCol]) || 0,
                 estencil: parseFloat(row[estencilCol]) || 0,
@@ -269,19 +280,30 @@ function calcularCrecimiento(estencil) {
 function calcularMetasAutomaticas() {
     if (!_calcMetasData || !_calcInformeData) return;
 
-    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = normalizeZona;
 
-    // Emparejar zonas entre ambos archivos
+    // Emparejar zonas entre ambos archivos usando CODIGO de zona (B03, B52, etc.)
     const metasZonas = Object.keys(_calcMetasData);
-    const informeZonas = Object.keys(_calcInformeData);
+    const informeKeys = Object.keys(_calcInformeData);
 
     const zonePairs = [];
     metasZonas.forEach(mz => {
-        const iz = informeZonas.find(i => normalize(i) === normalize(mz));
-        if (iz) {
-            zonePairs.push({ metas: mz, informe: iz, display: mz });
+        const met = _calcMetasData[mz];
+        const metCodigo = (met.codigo || '').toUpperCase();
+
+        // Primero intentar por codigo de zona
+        let infKey = null;
+        if (metCodigo) {
+            infKey = informeKeys.find(k => (_calcInformeData[k].codigo || '').toUpperCase() === metCodigo);
+        }
+        // Fallback: por nombre normalizado
+        if (!infKey) {
+            infKey = informeKeys.find(k => normalize(_calcInformeData[k].zona || k) === normalize(mz));
+        }
+
+        if (infKey) {
+            zonePairs.push({ metas: mz, informe: infKey, display: mz });
         } else {
-            // Zona solo en metas, sin datos de actividad
             zonePairs.push({ metas: mz, informe: null, display: mz });
         }
     });
