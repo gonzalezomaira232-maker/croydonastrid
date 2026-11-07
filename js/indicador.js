@@ -28,10 +28,12 @@ function renderIndicador() {
     }
 
     // Obtener fechaHasta de los registros de seguimiento para esta campana/anio
-    const segCampana = APP.data.seguimiento.filter(r =>
-        normalize(getSegCampana(r)).includes(normalize(campana)) &&
-        (!r.anioActividad || String(r.anioActividad) === String(anio))
-    );
+    const normCampana = normalize(campana);
+    const segCampana = APP.data.seguimiento.filter(r => {
+        if (r.anioActividad && String(r.anioActividad) !== String(anio)) return false;
+        const campRow = normalize(getSegCampana(r));
+        return campRow === normCampana || campRow === normCampana + ' ' + anio;
+    });
     let fechaHasta = null;
     for (let i = segCampana.length - 1; i >= 0; i--) {
         if (segCampana[i].fechaHasta) { fechaHasta = segCampana[i].fechaHasta; break; }
@@ -43,11 +45,12 @@ function renderIndicador() {
         const metaZona = metas.find(m => m.zona === zona) || {};
         const metaVal = parseFloat(metaZona[kpi]) || 0;
 
-        const seguimiento = APP.data.seguimiento.filter(r =>
-            normalize(getSegZona(r)) === normalize(zona) &&
-            normalize(getSegCampana(r)).includes(normalize(campana)) &&
-            (!r.anioActividad || String(r.anioActividad) === String(anio))
-        );
+        const seguimiento = APP.data.seguimiento.filter(r => {
+            if (normalize(getSegZona(r)) !== normalize(zona)) return false;
+            if (r.anioActividad && String(r.anioActividad) !== String(anio)) return false;
+            const campRow = normalize(getSegCampana(r));
+            return campRow === normCampana || campRow === normCampana + ' ' + anio;
+        });
 
         const actual = isPct
             ? promediarActividadZona(seguimiento, col)

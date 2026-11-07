@@ -13,10 +13,11 @@ function refreshDashboard() {
 
     const metas = APP.data.metas[key] || [];
     const normCampana = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normCamp = normCampana(campana);
     const seguimiento = APP.data.seguimiento.filter(r => {
-        const segCamp = r.campanaAsignada || r['Campaña'] || r['Campana'] || r.campana || '';
-        return normCampana(segCamp).includes(normCampana(campana)) &&
-            (!r.anioActividad || String(r.anioActividad) === String(anio));
+        if (r.anioActividad && String(r.anioActividad) !== String(anio)) return false;
+        const segCamp = normCampana(r.campanaAsignada || r['Campaña'] || r['Campana'] || r.campana || '');
+        return segCamp === normCamp || segCamp === normCamp + ' ' + anio;
     });
 
     renderDashTotales(seguimiento, metas);
