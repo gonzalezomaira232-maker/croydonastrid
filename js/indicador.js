@@ -42,7 +42,7 @@ function renderIndicador() {
 
     // Calcular datos por zona
     const rows = APP.zonas.map(zona => {
-        const metaZona = metas.find(m => m.zona === zona) || {};
+        const metaZona = metas.find(m => normalizeZona(m.zona) === normalizeZona(zona)) || {};
         const metaVal = parseFloat(metaZona[kpi]) || 0;
 
         const seguimiento = APP.data.seguimiento.filter(r => {
