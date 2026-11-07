@@ -1103,6 +1103,125 @@ body {
     }
 }
 
+/* ===== Calculador Automatico de Metas ===== */
+.calc-metas-panel {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.calc-metas-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.calc-metas-toggle:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+}
+
+.calc-metas-chevron {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.calc-metas-chevron.open {
+    transform: rotate(180deg);
+}
+
+.calc-metas-body {
+    padding: 20px;
+}
+
+.calc-metas-desc {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.calc-metas-uploads {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.calc-upload-single {
+    max-width: 400px;
+    margin-bottom: 16px;
+}
+
+.calc-upload-zone {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.calc-upload-zone:hover {
+    border-color: var(--primary-light);
+    background: rgba(26,35,126,0.02);
+}
+
+.calc-upload-zone.loaded {
+    border-color: var(--success);
+    border-style: solid;
+    background: #f1f8e9;
+}
+
+.calc-upload-zone i.fa-file-excel {
+    font-size: 2rem;
+    color: var(--gray-400);
+}
+
+.calc-upload-zone.loaded i.fa-file-excel {
+    color: var(--success);
+}
+
+.calc-upload-zone strong {
+    font-size: 0.9rem;
+    color: var(--primary);
+}
+
+.calc-upload-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.calc-upload-check {
+    font-size: 0.8rem;
+    color: var(--success);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.calc-upload-check i {
+    font-size: 0.9rem;
+    color: var(--success);
+}
+
+@media (max-width: 768px) {
+    .calc-metas-uploads {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ===== Admin Panel ===== */
 .admin-only {
     display: none !important;

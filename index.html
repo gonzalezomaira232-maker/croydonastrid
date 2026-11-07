@@ -113,6 +113,43 @@
                 </button>
                 <input type="file" id="fileInputMetas" accept=".xls,.xlsx" hidden>
             </div>
+            <!-- Calculador Automatico de Metas -->
+            <div class="calc-metas-panel">
+                <button class="calc-metas-toggle" id="btnToggleCalcMetas">
+                    <i class="fas fa-calculator"></i> Calcular Metas Automaticamente
+                    <i class="fas fa-chevron-down calc-metas-chevron"></i>
+                </button>
+                <div class="calc-metas-body" id="calcMetasBody" style="display:none;">
+                    <p class="calc-metas-desc">Sube los 2 archivos y haz clic en "Calcular Metas" para llenar la tabla automaticamente.</p>
+                    <div class="calc-metas-uploads">
+                        <div class="calc-upload-zone" id="dropMetas">
+                            <input type="file" id="fileMetasNav" accept=".xls,.xlsx" hidden>
+                            <i class="fas fa-file-excel"></i>
+                            <strong>Archivo de Metas</strong>
+                            <span class="calc-upload-hint">Ej: METAS C9 NAVIDAD (% Consec., Nuevas, Crecimiento, Pedidos)</span>
+                            <button class="btn btn-sm btn-outline" id="btnSelMetas">Seleccionar</button>
+                            <div class="calc-upload-check" id="checkMetas" style="display:none;">
+                                <i class="fas fa-check-circle"></i> <span id="nameMetas"></span>
+                            </div>
+                        </div>
+                        <div class="calc-upload-zone" id="dropInforme">
+                            <input type="file" id="fileInformeFinal" accept=".xls,.xlsx" hidden>
+                            <i class="fas fa-file-excel"></i>
+                            <strong>Actividad Acumulada</strong>
+                            <span class="calc-upload-hint">Ej: ActAcum (Activas, Inactivas, Estencil, VOP)</span>
+                            <button class="btn btn-sm btn-outline" id="btnSelInforme">Seleccionar</button>
+                            <div class="calc-upload-check" id="checkInforme" style="display:none;">
+                                <i class="fas fa-check-circle"></i> <span id="nameInforme"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="btnCalcularMetas" disabled>
+                        <i class="fas fa-cogs"></i> Calcular Metas
+                    </button>
+                    <div id="calcMetasMsg" class="message-area"></div>
+                </div>
+            </div>
+
             <div id="metasMsg" class="message-area"></div>
             <div class="table-container">
                 <table id="tablaMetas" class="data-table">
@@ -421,11 +458,11 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=11"></script>
-    <script src="js/metas.js?v=11"></script>
-    <script src="js/seguimiento.js?v=11"></script>
-    <script src="js/zonas.js?v=11"></script>
-    <script src="js/indicador.js?v=11"></script>
-    <script src="js/dashboard.js?v=11"></script>
+    <script src="js/app.js?v=12"></script>
+    <script src="js/metas.js?v=14"></script>
+    <script src="js/seguimiento.js?v=12"></script>
+    <script src="js/zonas.js?v=12"></script>
+    <script src="js/indicador.js?v=12"></script>
+    <script src="js/dashboard.js?v=12"></script>
 </body>
 </html>
