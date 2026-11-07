@@ -383,6 +383,12 @@ function updateZonasFromMetas() {
     console.log('Zonas activas:', APP.zonas.length, APP.zonas);
 }
 
+// ===== Normalizacion global =====
+// Normaliza nombres de zonas: quita acentos, guiones, espacios extra, minusculas
+function normalizeZona(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 // ===== Utilidades =====
 function showMessage(containerId, text, type = 'info') {
     const container = document.getElementById(containerId);
