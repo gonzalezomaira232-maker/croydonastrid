@@ -116,7 +116,7 @@ function renderChartCumplimiento(metas, seguimiento) {
     const normalize = normalizeZona;
 
     const zonasData = APP.zonas.map(zona => {
-        const meta = metas.find(m => m.zona === zona);
+        const meta = metas.find(m => normalizeZona(m.zona) === normalizeZona(zona));
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
         const pct = (!meta || !meta['PPDD']) ? 0 : calcPct(sumarActividadZona(seg, 'PPDD'), meta['PPDD']);
         return { zona, pct };
@@ -232,7 +232,7 @@ function renderPodio(metas, seguimiento) {
         const colSeg = colMap[kpi] || kpi;
 
         const ranking = APP.zonas.map(zona => {
-            const meta = metas.find(m => m.zona === zona);
+            const meta = metas.find(m => normalizeZona(m.zona) === normalizeZona(zona));
             const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
             const metaVal = meta ? (parseFloat(meta[kpi]) || 0) : 0;
             const actual = isPct ? promediarActividadZona(seg, colSeg) : sumarActividadZona(seg, colSeg);
@@ -270,7 +270,7 @@ function renderSemaforo(metas, seguimiento) {
     head.innerHTML = '<tr><th>Zona</th>' + kpisDash.map(k => `<th>${k}</th>`).join('') + '</tr>';
 
     body.innerHTML = APP.zonas.map(zona => {
-        const meta = metas.find(m => m.zona === zona) || {};
+        const meta = metas.find(m => normalizeZona(m.zona) === normalizeZona(zona)) || {};
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
 
         const cells = kpisDash.map(kpi => {

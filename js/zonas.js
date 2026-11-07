@@ -89,7 +89,7 @@ function mostrarDetalleZona(zona) {
 
     // Meta por campana
     const metas = APP.data.metas[key] || [];
-    const metaZona = metas.find(m => m.zona === zona) || {};
+    const metaZona = metas.find(m => normalize(m.zona) === normalize(zona)) || {};
 
     // Seguimiento filtrado por zona, campana exacta Y anio
     const normCampana = normalize(campana);
