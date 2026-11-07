@@ -230,7 +230,9 @@ async function confirmarCarga() {
     // Derivar campanaAsignada y anioActividad de la columna Campaña del Excel (ej: "PADRES 2026" -> "PADRES", 2026)
     const dataConFecha = parsedExcelData.map(row => {
         const campExcel = row['Campaña'] || row['Campana'] || '';
-        const campMatch = APP.campanas.find(c => norm(campExcel).includes(norm(c))) || campExcel;
+        // Buscar campana mas larga primero para evitar que "NAVIDAD" matchee "PRE-NAVIDAD"
+        const campanasSorted = [...APP.campanas].sort((a, b) => b.length - a.length);
+        const campMatch = campanasSorted.find(c => norm(campExcel).includes(norm(c))) || campExcel;
         const anioMatch = campExcel.match(/\d{4}/);
         const anioActividad = anioMatch ? parseInt(anioMatch[0]) : new Date().getFullYear();
         return { ...row, fechaCarga, campanaAsignada: campMatch, anioActividad,
