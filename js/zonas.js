@@ -23,7 +23,7 @@ function getSegCampana(r) {
     return r.campanaAsignada || r['Campaña'] || r['Campana'] || r.campana || '';
 }
 
-const normalize = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const normalize = normalizeZona;
 
 // Sumar todas las filas de la ultima carga para una zona
 function sumarActividadZona(seguimiento, col) {

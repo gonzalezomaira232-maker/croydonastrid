@@ -40,7 +40,7 @@ function renderDashTotales(seguimiento, metas) {
     const pctKpis = ['% Consec.'];
     const avgMetaKpis = ['VOP'];
 
-    const normDash = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normDash = normalizeZona;
 
     container.innerHTML = kpisDash.map(kpi => {
         const isPct = pctKpis.includes(kpi);
@@ -113,7 +113,7 @@ function renderChartCumplimiento(metas, seguimiento) {
     const ctx = document.getElementById('chartCumplimientoZona').getContext('2d');
     if (chartCumplimiento) chartCumplimiento.destroy();
 
-    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = normalizeZona;
 
     const zonasData = APP.zonas.map(zona => {
         const meta = metas.find(m => m.zona === zona);
@@ -171,7 +171,7 @@ function renderChartFQZona(seguimiento) {
     const ctx = document.getElementById('chartFQZona').getContext('2d');
     if (chartFQZona) chartFQZona.destroy();
 
-    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = normalizeZona;
 
     const fqData = APP.zonas.map(zona => {
         const seg = seguimiento.filter(r => normalize(r['CZ-Zona'] || r.Zona || r.zona || '') === normalize(zona));
@@ -216,7 +216,7 @@ function renderChartFQZona(seguimiento) {
 
 function renderPodio(metas, seguimiento) {
     const container = document.getElementById('podioContainer');
-    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = normalizeZona;
     const kpisPodio = ['Crecimiento', 'PPDD', 'Consec.'];
     const colMap = {
         'Consec.': 'Consec.', 'Crecimiento': 'Cmto.', 'PPDD': 'PPDD'
@@ -264,7 +264,7 @@ function renderPodio(metas, seguimiento) {
 function renderSemaforo(metas, seguimiento) {
     const head = document.getElementById('headSemaforo');
     const body = document.getElementById('bodySemaforo');
-    const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = normalizeZona;
 
     const kpisDash = APP.kpis.filter(k => k !== 'Estencil Pas');
     head.innerHTML = '<tr><th>Zona</th>' + kpisDash.map(k => `<th>${k}</th>`).join('') + '</tr>';
